@@ -1,8 +1,7 @@
-#include <iostream>
-#include <GLEW/glew.h>
-#include <GLFW/glfw3.h>
 #include <GLM/glm.hpp>
+#include "Debugger.h"
 #include "Shader.h"
+
 int main()
 {
 	GLFWwindow * window;
@@ -13,19 +12,36 @@ int main()
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	
 
-	window = glfwCreateWindow(800, 600, "OpenGL", NULL, NULL);
 	glfwWindowHint(GL_SAMPLES, 4);
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+	window = glfwCreateWindow(800, 600, "OpenGL", NULL, NULL);
 	glfwMakeContextCurrent(window);
+	
 
 	if (glewInit() == GLEW_OK)
 	{
 		std::cout << glGetString(GL_VERSION) << " " << glGetString(GL_VENDOR) << std::endl;
+		if (glDebugMessageCallback) {
+			std::cout << "Register OpenGL debug callback " << std::endl;
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+			glDebugMessageCallback(DebugCallback, nullptr);
+			GLuint unusedIds = 0;
+			glDebugMessageControl(GL_DONT_CARE,
+				GL_DONT_CARE,
+				GL_DONT_CARE,
+				0,
+				&unusedIds,
+				true);
+		}
+		else
+			std::cout << "glDebugMessageCallback not available" << std::endl;
 	}
 	else
 	{
 		std::cerr << "ERROR::FAILED_TO_INITIALIZE_GLEW\n";
 	}
 	
+
 	float vertices[] = {
 		-0.5f, -0.5f, 0.0f, 1.f, 0.f, 0.f,  
 		 0.5f, -0.5f, 0.0f, 0.f, 1.f, 0.f,
@@ -63,7 +79,6 @@ int main()
 
 	while (!glfwWindowShouldClose(window))
 	{
-
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		simple_shader.BindShaderProgram();

@@ -51,17 +51,16 @@ void Shader::CompileShader(const char * VertexShaderCode, const char * FragmentS
 	m_ShaderProgramID = glCreateProgram();
 	unsigned int __vertex_shader_id_ = GetShaderID(GL_VERTEX_SHADER, VertexShaderCode);
 	unsigned int __fragment_shader_id_ = GetShaderID(GL_FRAGMENT_SHADER, FragmentShaderCode);
-	int CompileStat;
-	glUseProgram(m_ShaderProgramID);
 	glAttachShader(m_ShaderProgramID, __vertex_shader_id_);
 	glAttachShader(m_ShaderProgramID, __fragment_shader_id_);
 	glLinkProgram(m_ShaderProgramID);
 	glValidateProgram(m_ShaderProgramID);
 
-	glGetProgramiv(m_ShaderProgramID, GL_COMPILE_STATUS, &CompileStat);
-	if (CompileStat == GL_FALSE)
+	int CompileStat = 1;
+	glGetProgramiv(m_ShaderProgramID, GL_LINK_STATUS, &CompileStat);
+	if (CompileStat != GL_TRUE)
 	{
-		int InfoLogLength;
+		int InfoLogLength = 1024;
 		glGetProgramiv(m_ShaderProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
 		char * ErrorMessage = new char[InfoLogLength];
 		glGetProgramInfoLog(m_ShaderProgramID, InfoLogLength, &InfoLogLength, ErrorMessage);
@@ -141,7 +140,9 @@ void Shader::printLocationCache()
 
 void Shader::BindShaderProgram()
 {
+	glLinkProgram(m_ShaderProgramID);
 	glUseProgram(m_ShaderProgramID);
+	glValidateProgram(m_ShaderProgramID);
 }
 
 void Shader::UnBindShaderProgram()
