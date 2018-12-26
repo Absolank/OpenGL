@@ -95,7 +95,8 @@ int Shader::GetUniformLocation(std::string & UniformName)
 	{
 		return m_UniformLocationCache[UniformName];
 	}
-	int __uniform_location = glGetUniformLocation(m_ShaderProgramID, UniformName.c_str());
+	const char * __uniform_name_ = UniformName.c_str();
+	int __uniform_location = glGetUniformLocation(m_ShaderProgramID, __uniform_name_);
 	m_UniformLocationCache[UniformName] = __uniform_location;
 	if (__uniform_location == -1)
 		std::cerr << "ERROR::SPECIFIED_UNIFORM_NAME_NOT_FOUND (\" " <<  UniformName << " \") !!!\n";
@@ -131,7 +132,7 @@ void Shader::SetUniform(std::string & UniformName, glm::mat3x4 & MatrixValue) { 
 
 void Shader::SetUniform(std::string & UniformName, glm::mat4x2 & MatrixValue) { glUniformMatrix4x2fv(GetUniformLocation(UniformName), 1, GL_FALSE, glm::value_ptr(MatrixValue)); }
 void Shader::SetUniform(std::string & UniformName, glm::mat4x3 & MatrixValue) { glUniformMatrix4x3fv(GetUniformLocation(UniformName), 1, GL_FALSE, glm::value_ptr(MatrixValue)); }
-void Shader::SetUniform(std::string & UniformName, glm::mat4x4 & MatrixValue) { glUniformMatrix4fv(GetUniformLocation(UniformName), 1,   GL_FALSE, glm::value_ptr(MatrixValue)); }
+void Shader::SetUniform(std::string & UniformName, glm::mat4x4 & MatrixValue) { glUniformMatrix4fv(GetUniformLocation(UniformName), 1, GL_FALSE, glm::value_ptr(MatrixValue)); }
 
 
 void Shader::printLocationCache()
