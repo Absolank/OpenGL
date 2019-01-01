@@ -1,47 +1,20 @@
+#include <iostream>
+#include <GLEW/glew.h>
 #include <GLM/glm.hpp>
-#include "Debugger.h"
+#include <GLM/gtc/matrix_transform.hpp>
+#include <GLM/gtc/type_ptr.hpp>
+#include "Window.h"
 #include "Shader.h"
 #include "Texture.h"
 #include "STB/stb_image.h"
+
+
+void printMat(glm::mat4& matrix);
+
+
 int main()
 {
-	GLFWwindow * window;
-	if (!glfwInit())
-	{
-		std::cerr << "ERROR::FAILED_TO_INITIALIZE_GLFW\n";
-	}
-	glfwWindowHint(GLFW_SAMPLES, 4);
-	
-
-	glfwWindowHint(GL_SAMPLES, 4);
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-	window = glfwCreateWindow(800, 600, "OpenGL", NULL, NULL);
-	glfwMakeContextCurrent(window);
-	
-
-	if (glewInit() == GLEW_OK)
-	{
-		std::cout << glGetString(GL_VERSION) << " " << glGetString(GL_VENDOR) << std::endl;
-		if (glDebugMessageCallback) {
-			std::cout << "Register OpenGL debug callback " << std::endl;
-			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-			glDebugMessageCallback(DebugCallback, nullptr);
-			GLuint unusedIds = 0;
-			glDebugMessageControl(GL_DONT_CARE,
-				GL_DONT_CARE,
-				GL_DONT_CARE,
-				0,
-				&unusedIds,
-				true);
-		}
-		else
-			std::cout << "glDebugMessageCallback not available" << std::endl;
-	}
-	else
-	{
-		std::cerr << "ERROR::FAILED_TO_INITIALIZE_GLEW\n";
-	}
-	
+	Window window(800, 600, "OpenGL", true);
 
 	float vertices[] = {
 		-0.5f, -0.5f, 0.0f,  0.f, 0.f,  
@@ -90,26 +63,49 @@ int main()
 
 	Texture texte("res/awesomeface.png");
 	texte.Bind();
-	
-	float prev_time = glfwGetTime();
-	float delta_time = 0.f;
-	float curr_time = 0.f;
-	float x = 0.f;
-	while (!glfwWindowShouldClose(window))
-	{
-		curr_time = glfwGetTime();
-		delta_time = curr_time - prev_time;
-		prev_time = curr_time;
+
+	std::string s_projection = "projection", s_model = "model", s_view = "view";
+	glm::mat4 model(1.f);
+	glm::mat4 view(1.f);
+	glm::mat4 projection(1.f);
+
+
+	printMat(model);
+	//printMat(view);
+	//printMat(projection);
+
+
+	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	printMat(model);
+
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	printMat(view);
+	projection = glm::perspective(glm::radians(45.0f), (4.f / 3.f), 0.1f, 100.0f);
+	glm::mat4 orthogonal_projection = glm::ortho(0.f, 800.f, 0.f,600.f, 0.1f, 100.f);
+
+	simple_shader.SetUniform(s_model, model);
+	simple_shader.SetUniform(s_view, view);
+	simple_shader.SetUniform(s_projection, projection);
+
+
+	WINDOW_BEGIN(window)
 
 		glClear(GL_COLOR_BUFFER_BIT);
-		glRotatef(x, 0.f, 0.f, 1.f);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
-		x += delta_time;
-		std::cout << x << " ";
-		glfwSwapBuffers(window);
-		glfwPollEvents();
-	}
-	glfwTerminate();
-	glfwDestroyWindow(window);
+
+		window.SwapBuffers();
+		window.PollEvents();
+	WINDOW_END(window)
+
 	return 0;
+}
+
+void printMat(glm::mat4 & matrix)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+			std::cout << matrix[i][j];
+		std::cout << std::endl;
+	}
 }
