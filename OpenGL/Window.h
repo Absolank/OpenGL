@@ -126,6 +126,13 @@ enum KEY
 
  LAST            =   MENU
 };
+
+
+class MouseCallback
+{
+public:
+	virtual void Mouse(double x, double y);
+};
 class Window
 {
 	struct GLFWwindow * __window_;
@@ -133,11 +140,19 @@ class Window
 	double __p_time_;
 	double __curr_time;
 	double __delta_time;
+	
 	static void WindowResize(GLFWwindow * window, int width, int height);
 	static void Mouse(GLFWwindow * window, double xpos, double ypos);
+
 public:
 	void Tick();
-	double GetTime();
+	static void PushMouseCallbacks(MouseCallback& mouse_callback);
+	static double GetTime();
+	double GetMouseX();
+	double GetDeltaX();
+	double GetMouseY();
+	double GetDeltaY();
+
 	double GetDeltaTime();
 	void BeginTicking();
 	Window(int Width, int Height, const char * WindowName, bool InitGlew);

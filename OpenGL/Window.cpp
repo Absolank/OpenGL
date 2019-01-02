@@ -1,7 +1,15 @@
 #include "Window.h"
 #include <GLEW/glew.h>
 #include <GLFW/glfw3.h>
+#include <GLM/glm.hpp>
 #include <iostream>
+#include <functional>
+#include <vector>
+#include "Camera.h"
+
+
+void MouseCallback::Mouse(double x, double y){}
+
 void APIENTRY DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 
 	std::cout << "---------------------opengl-callback-start------------" << std::endl;
@@ -47,12 +55,27 @@ void APIENTRY DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
 }
 void Window::WindowResize(GLFWwindow *  window, int  width, int  height)
 {
-
+	glViewport(0, 0, width, height);
 }
 
+std::vector<MouseCallback *> MouseCallbacks;
+double mouse_x, mouse_y;
+double delta_mouse_x, delta_mouse_y;
 void Window::Mouse(GLFWwindow * window, double xpos, double ypos)
 {
+	double xoffset = xpos - mouse_x;
+	double yoffset = mouse_y - ypos;
+	mouse_x = xpos;
+	mouse_y = ypos;
 
+	delta_mouse_x = xoffset;
+	delta_mouse_y = yoffset;
+	
+	//mou->Mouse(xoffset, yoffset);
+	for (MouseCallback * m_callback : MouseCallbacks)
+	{
+		m_callback->Mouse(xoffset, yoffset);
+	}
 }
 void Window::Tick()
 {
@@ -63,9 +86,29 @@ void Window::Tick()
 		__p_time_ = __curr_time;
 	//}
 }
+void Window::PushMouseCallbacks(MouseCallback & mouse_callback)
+{
+	MouseCallbacks.emplace_back(&mouse_callback);
+}
 double Window::GetTime()
 {
 	return glfwGetTime();
+}
+double Window::GetMouseX()
+{
+	return mouse_x;
+}
+double Window::GetDeltaX()
+{
+	return delta_mouse_x;
+}
+double Window::GetMouseY()
+{
+	return mouse_y;
+}
+double Window::GetDeltaY()
+{
+	return delta_mouse_y;
 }
 double Window::GetDeltaTime()
 {
@@ -77,19 +120,25 @@ void Window::BeginTicking()
 }
 Window::Window(int Width, int Height, const char * WindowName, bool InitGlew)
 {
+	//mouse_x = Width/2;
+	//mouse_y = Height/2;
 	if (!glfwInit())
 	{
 		std::cout << "ERROR::CANNOT_INITIALIZE_GLFW\n";
 	}
 	else
 	{
-		glfwWindowHint(GL_SAMPLES, 4);
+		glfwWindowHint(GL_SAMPLES, 16);
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-		__window_ = glfwCreateWindow(800, 600, "OpenGL", NULL, NULL);
+		//GLFWmonitor * monitor = glfwGetPrimaryMonitor();
+		__window_ = glfwCreateWindow(Width, Height, "OpenGL", NULL, NULL);
+		glfwSetInputMode(__window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 		MakeContextCurrent();
 
 		glfwSetWindowSizeCallback(__window_, WindowResize);
 		glfwSetCursorPosCallback(__window_, Mouse);
+		glEnable(GL_DEPTH_TEST);
 		if (glewInit() == GLEW_OK)
 		{
 			std::cout << glGetString(GL_VERSION) << " " << glGetString(GL_VENDOR) << std::endl;
