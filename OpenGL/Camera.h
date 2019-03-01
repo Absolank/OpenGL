@@ -21,6 +21,7 @@ public:
 	void Mouse(double xoffset, double yoffset);
 	Camera();
 	Camera(glm::vec3& __pos_, glm::vec3& __up_);
+	glm::vec3 GetPositionVector();
 	void MoveUp(float delta_time);
 	void MoveDown(float delta_time);
 	void MoveForward(float delta_time);

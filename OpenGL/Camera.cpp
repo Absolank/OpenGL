@@ -54,6 +54,11 @@ Camera::Camera(vec3& __pos_, vec3& __up_) :
 	UpdateCamera();
 }
 
+glm::vec3 Camera::GetPositionVector()
+{
+	return __position_;
+}
+
 void Camera::MoveUp(float delta_time)
 {
 	__position_ += __up_ * __mouse_speed_* delta_time;

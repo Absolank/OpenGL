@@ -115,7 +115,7 @@ void Shader::SetUniform(std::string & UniformName, glm::vec2 & v) { glUniform2f(
 void Shader::SetUniform(std::string & UniformName, int v1, int v2, int v3) { glUniform3i(GetUniformLocation(UniformName), v1, v2, v3); }
 void Shader::SetUniform(std::string & UniformName, float v1, float v2, float v3) { glUniform3f(GetUniformLocation(UniformName), v1, v2, v3); }
 void Shader::SetUniform(std::string & UniformName, double v1, double v2, double v3) { glUniform3d(GetUniformLocation(UniformName), v1, v2, v3); }
-void Shader::SetUniform(std::string & UniformName, glm::vec3 & v) { glUniform3f(GetUniformLocation(UniformName), v.x, v.y, v.z); }
+void Shader::SetUniform(std::string & UniformName, glm::vec3 & v) { glUniform3f(GetUniformLocation(UniformName), (float)v.x, (float)v.y, (float)v.z); }
 
 void Shader::SetUniform(std::string & UniformName, int v1, int v2, int v3, int v4) { glUniform4i(GetUniformLocation(UniformName), v1, v2, v3, v4);  }
 void Shader::SetUniform(std::string & UniformName, float v1, float v2, float v3, float v4){ glUniform4f(GetUniformLocation(UniformName), v1, v2, v3, v4);  }
@@ -141,9 +141,9 @@ void Shader::printLocationCache()
 
 void Shader::BindShaderProgram()
 {
-	glLinkProgram(m_ShaderProgramID);
+	//glLinkProgram(m_ShaderProgramID);
 	glUseProgram(m_ShaderProgramID);
-	glValidateProgram(m_ShaderProgramID);
+	//glValidateProgram(m_ShaderProgramID);
 }
 
 void Shader::UnBindShaderProgram()

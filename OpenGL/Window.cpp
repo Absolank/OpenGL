@@ -6,9 +6,13 @@
 #include <functional>
 #include <vector>
 #include "Camera.h"
+#include "imgui/imgui_impl_opengl3.h"
+#include "imgui/imgui_impl_glfw.h"
 
 
+static float clear_color[] = { .45f, .55f, .60f, 1.f };
 void MouseCallback::Mouse(double x, double y){}
+
 
 void APIENTRY DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 
@@ -53,30 +57,25 @@ void APIENTRY DebugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
 	std::cout << std::endl;
 	std::cout << "---------------------opengl-callback-end--------------" << std::endl;
 }
-void Window::WindowResize(GLFWwindow *  window, int  width, int  height)
-{
-	glViewport(0, 0, width, height);
-}
 
-std::vector<MouseCallback *> MouseCallbacks;
-double mouse_x, mouse_y;
-double delta_mouse_x, delta_mouse_y;
-void Window::Mouse(GLFWwindow * window, double xpos, double ypos)
+
+void Window::MouseCallbacks(double xpos, double ypos)
 {
-	double xoffset = xpos - mouse_x;
+	double xoffset = xpos - Window::mouse_x;
 	double yoffset = mouse_y - ypos;
 	mouse_x = xpos;
 	mouse_y = ypos;
 
 	delta_mouse_x = xoffset;
 	delta_mouse_y = yoffset;
-	
+
 	//mou->Mouse(xoffset, yoffset);
-	for (MouseCallback * m_callback : MouseCallbacks)
+	for (MouseCallback * m_callback : __mouse_callbacks_)
 	{
 		m_callback->Mouse(xoffset, yoffset);
 	}
 }
+
 void Window::Tick()
 {
 	//if (isTicking)
@@ -88,7 +87,7 @@ void Window::Tick()
 }
 void Window::PushMouseCallbacks(MouseCallback & mouse_callback)
 {
-	MouseCallbacks.emplace_back(&mouse_callback);
+	__mouse_callbacks_.emplace_back(&mouse_callback);
 }
 double Window::GetTime()
 {
@@ -135,9 +134,18 @@ Window::Window(int Width, int Height, const char * WindowName, bool InitGlew)
 		glfwSetInputMode(__window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 		MakeContextCurrent();
-
-		glfwSetWindowSizeCallback(__window_, WindowResize);
-		glfwSetCursorPosCallback(__window_, Mouse);
+		glfwSetWindowSizeCallback(__window_,
+		[](GLFWwindow *  window, int  width, int  height)
+		{
+			glViewport(0, 0, width, height);
+		});
+		glfwSetWindowUserPointer(__window_, (void *)this);
+		glfwSetCursorPosCallback(__window_, 
+		[](GLFWwindow * window, double xpos, double ypos)
+		{
+			Window * window_obj = (Window *)glfwGetWindowUserPointer(window);
+			window_obj->MouseCallbacks(xpos, ypos);
+		});
 		glEnable(GL_DEPTH_TEST);
 		if (glewInit() == GLEW_OK)
 		{
@@ -153,6 +161,10 @@ Window::Window(int Width, int Height, const char * WindowName, bool InitGlew)
 					0,
 					&unusedIds,
 					true);
+
+				/*ImGui::CreateContext();
+				ImGui_ImplGlfw_InitForOpenGL(__window_, true);
+				ImGui::StyleColorsDark();*/
 			}
 			else
 				std::cout << "glDebugMessageCallback not available" << std::endl;
@@ -161,12 +173,16 @@ Window::Window(int Width, int Height, const char * WindowName, bool InitGlew)
 		{
 			std::cerr << "ERROR::FAILED_TO_INITIALIZE_GLEW\n";
 		}
+		
+
 	}
 }
 
 
 Window::~Window()
 {
+	//ImGui_ImplGlfw_Shutdown();
+	//ImGui::DestroyContext();
 	glfwDestroyWindow(__window_);
 	glfwTerminate();
 }
@@ -201,11 +217,31 @@ bool Window::isKeyRepeated(KEY KEY_ID)
 
 bool Window::windowShouldClose()
 {
+	/*static float f = 0.f;
+	static int counter = 0;
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
+	ImGui::Begin("OpenGL");
+	ImGui::SliderFloat("float", &f, 0.f, 1.f);
+	ImGui::ColorEdit3("clear color", (float*)&clear_color);
+	ImGui::Checkbox("Demo Window", &show_demo_window);
+	ImGui::Checkbox("Another Window", &show_another_window);
+	if (ImGui::Button("Button"))
+		counter++;
+	ImGui::SameLine();
+	ImGui::Text("counter = %d", counter);
+	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	ImGui::End();*/
+
 	return glfwWindowShouldClose(__window_);
 }
 
 void Window::SwapBuffers()
 {
+	/*ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());*/
 	glfwSwapBuffers(__window_);
 }
 

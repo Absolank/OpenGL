@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 enum KEY
 {
  SPACE            =  32,
@@ -140,13 +141,16 @@ class Window
 	double __p_time_;
 	double __curr_time;
 	double __delta_time;
-	
-	static void WindowResize(GLFWwindow * window, int width, int height);
-	static void Mouse(GLFWwindow * window, double xpos, double ypos);
+	bool show_demo_window = true;
+	bool show_another_window = false;
 
+	std::vector<MouseCallback *> __mouse_callbacks_;
+	double mouse_x, mouse_y;
+	double delta_mouse_x, delta_mouse_y;
 public:
+	void MouseCallbacks(double x, double y);
 	void Tick();
-	static void PushMouseCallbacks(MouseCallback& mouse_callback);
+	void PushMouseCallbacks(MouseCallback& mouse_callback);
 	static double GetTime();
 	double GetMouseX();
 	double GetDeltaX();
